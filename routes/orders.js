@@ -38,13 +38,13 @@ router.post('/', async (req, res) => {
   let item = [];
 
   for (let i = 0; i < req.body.itemId.length; i++) {
-    let ab;
+    let item;
     try {
-      ab = await Items.findById(req.body.itemId[i]);
+      item = await Items.findById(req.body.itemId[i]);
     } catch (error) {
       return res.status(404).send('Item could not be found');
     }
-    item.push(ab);
+    item.push(item);
   }
 
   const order = new Orders({
@@ -64,7 +64,7 @@ router.post('/', async (req, res) => {
       );
     }
     task.run();
-  } catch (ex) {
+  } catch (error) {
     res.status(500).send('Something failed');
   }
 
