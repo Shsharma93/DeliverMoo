@@ -10,30 +10,23 @@ Fawn.init(mongoose);
 
 router.get('/', async (req, res) => {
   try {
-    const order = await Orders.find();
-    res.send(order);
+    const orders = await Orders.find();
+    res.json({ success: true, orders });
   } catch (error) {
-    res.status(404).send('Order could not be found');
-  }
-});
-
-router.get('/:id', async (req, res) => {
-  try {
-    const order = await Orders.findById({ _id: req.params.id });
-    res.send(order);
-  } catch (error) {
-    res.status(404).send('Order could not be found');
+    res
+      .status(404)
+      .json({ success: false, message: 'Item could not be found' });
   }
 });
 
 router.post('/', async (req, res) => {
   const { error } = validateOrder(req.body);
   if (error) {
-    return res.status(400).send('Invalid request');
+    return res.status(400).json({ success: false, message: 'Invalid request' });
   }
 
   if (req.body.itemId.length !== req.body.quantity.length)
-    return res.status(400).send('Invalid request');
+    return res.status(400).json({ success: false, message: 'Invalid request' });
 
   let item = [];
 
@@ -42,7 +35,9 @@ router.post('/', async (req, res) => {
     try {
       item = await Items.findById(req.body.itemId[i]);
     } catch (error) {
-      return res.status(404).send('Item could not be found');
+      return res
+        .status(404)
+        .json({ success: false, message: 'Item could not be found' });
     }
     item.push(item);
   }
@@ -56,7 +51,9 @@ router.post('/', async (req, res) => {
     task = task.save('orders', order);
     for (let i in item) {
       if (item[i].stock < +req.body.quantity[i])
-        return res.status(400).send('Item does not have enough stock');
+        return res
+          .status(400)
+          .json({ success: false, message: 'Item does not have enough stock' });
       task.update(
         'items',
         { _id: item[i]._id },
@@ -65,10 +62,12 @@ router.post('/', async (req, res) => {
     }
     task.run();
   } catch (error) {
-    res.status(500).send('Something failed');
+    res
+      .status(500)
+      .json({ success: false, message: 'Order could not be completed' });
   }
 
-  res.send(order);
+  res.json({ success: true, order });
 });
 
 module.exports = router;

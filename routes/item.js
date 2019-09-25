@@ -7,16 +7,18 @@ const auth = require('../auth');
 router.get('/:id', async (req, res) => {
   try {
     const item = await Items.findById({ _id: req.params.id });
-    res.send(item);
+    res.json({ success: true, item });
   } catch (error) {
-    res.status(404).send('Item could not be found');
+    res
+      .status(404)
+      .json({ success: false, message: 'Item could not be found' });
   }
 });
 
 router.put('/:id', auth, async (req, res) => {
   const { error } = validatePutItem(req.body);
   if (error) {
-    return res.status(400).send(error.details[0].message);
+    return res.status(400).json({ success: false, message: 'Invalid request' });
   }
 
   try {
@@ -25,18 +27,22 @@ router.put('/:id', auth, async (req, res) => {
         ...req.body
       }
     });
-    res.send('true');
+    res.json({ success: true });
   } catch (error) {
-    return res.status(404).send('Item could not be found');
+    return res
+      .status(404)
+      .json({ success: false, message: 'Item could not be found' });
   }
 });
 
 router.delete('/:id', auth, async (req, res) => {
   try {
     await Items.findByIdAndRemove({ _id: req.params.id });
-    res.send('true');
+    res.json({ success: true });
   } catch (error) {
-    res.status(400).send('Item could not be found');
+    res
+      .status(400)
+      .json({ success: false, message: 'Item could not be found' });
   }
 });
 
