@@ -18,28 +18,31 @@ router.get('/', async (req, res) => {
 
 router.post('/', auth, async (req, res) => {
   const { error } = validatePostItem(req.body);
-
   if (error) {
     return res.status(400).json({ success: false, message: 'Invalid request' });
   }
 
   try {
-    const item = await Items.findOne(
-      _.pick(req.body, ['type', 'color', 'size'])
-    );
+    const allItems = [];
+    for (let i in req.body.items) {
+      const item = await Items.findOne(
+        _.pick(req.body.items[i], ['type', 'color', 'size'])
+      );
 
-    if (item) {
-      item.stock += req.body.stock;
-      await item.save();
-      return res.json({ success: true, itemIds: item._id });
+      if (item) {
+        item.stock += req.body.items[i].stock;
+        await item.save();
+        allItems.push(item._id);
+      } else {
+        const newItem = new Items({ ...req.body.items[i] });
+        await newItem.save();
+        allItems.push(newItem._id);
+      }
     }
-
-    const newItem = new Items({ ...req.body });
-    await newItem.save();
-    res.json({ success: true, itemIds: newItem._id });
+    res.json({ success: true, itemIds: allItems });
   } catch (error) {
     return res
-      .status(404)
+      .status(400)
       .json({ success: false, message: 'One (or more) items are invalid' });
   }
 });

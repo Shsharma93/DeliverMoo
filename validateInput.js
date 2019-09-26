@@ -16,16 +16,21 @@ const validateOrder = data => {
 
 const validatePostItem = data => {
   const schema = Joi.object({
-    type: Joi.string()
-      .min(3)
-      .max(50)
-      .required(),
-    color: Joi.string()
-      .min(3)
-      .max(50)
-      .required(),
-    size: Joi.string().valid('S', 'M', 'L'),
-    stock: Joi.number().required()
+    items: Joi.array()
+      .items({
+        type: Joi.string()
+          .min(3)
+          .max(50)
+          .required(),
+        color: Joi.string()
+          .min(3)
+          .max(50)
+          .required(),
+        size: Joi.string().valid('S', 'M', 'L'),
+        stock: Joi.number().required()
+      })
+      .min(1)
+      .required()
   });
   return schema.validate(data);
 };

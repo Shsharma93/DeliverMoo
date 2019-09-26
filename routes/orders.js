@@ -31,15 +31,15 @@ router.post('/', async (req, res) => {
   let item = [];
 
   for (let i = 0; i < req.body.itemId.length; i++) {
-    let item;
+    let product;
     try {
-      item = await Items.findById(req.body.itemId[i]);
+      product = await Items.findById(req.body.itemId[i]);
     } catch (error) {
       return res
         .status(404)
         .json({ success: false, message: 'Item could not be found' });
     }
-    item.push(item);
+    item.push(product);
   }
 
   const order = new Orders({
